@@ -12,6 +12,7 @@ resource "azurerm_resource_group" "RG01" {
 resource "azuread_user" "trainee" {
   user_principal_name = "${var.traineeUserPrincipal}"
   display_name        = "${var.traineeDisplayName}"
+  depends_on = [azurerm_resource_group.RG01] # Added to guarentee the order of creation
 }
 
 
@@ -20,6 +21,7 @@ resource "azuread_user" "trainer" {
   user_principal_name = "${var.trainerUserPrincipal}"
   display_name        = "${var.trainerDisplayName}"
   force_password_change = "true"
+  depends_on = [azuread_user.trainee] # Added to guarentee the order of creation
 }
 
 
@@ -27,18 +29,20 @@ resource "azuread_user" "trainer" {
 resource "aws_s3_bucket" "b" {
     bucket = "${var.s3BucketName}-${count.index}"
     count = var.numberOfBuckets
+    depends_on = [azuread_user.trainer]# Added to guarentee the order of creation
 }
 
 
 # Creates the four new aws users
-resource "aws_iam_user" "new-users" {
+resource "aws_iam_user" "new_users" {
     for_each = toset(var.users)
     name = each.value
+    depends_on = [aws_s3_bucket.b]# Added to guarentee the order of creation
 }
 
 
 # Creates the azure storage account
-resource "azurerm_storage_account" "stg-acc" {
+resource "azurerm_storage_account" "stg_acc" {
   name                     = "${var.storageAccountName}"
   resource_group_name      = azurerm_resource_group.RG01.name
   location                 = azurerm_resource_group.RG01.location
@@ -48,6 +52,7 @@ resource "azurerm_storage_account" "stg-acc" {
   tags = {
     environment = "test"
   }
+  depends_on = [aws_iam_user.new_user]
 }
 
 
@@ -58,7 +63,7 @@ resource "azurerm_virtual_machine" "main" {
   resource_group_name   = azurerm_resource_group.RG01.name
   network_interface_ids = []
   vm_size               = "${var.vmSize}"
-
+  depends_on = [azurerm_storage_account.stg_acc]
 
   storage_image_reference {
     publisher = "Canonical"
