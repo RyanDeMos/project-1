@@ -34,6 +34,14 @@ variable "storageAccountName" {
     default = "stg-acc-01"
 }
 
+variable "storageAccountTier" {
+    default = "Standard"
+}
+
+variable "storageAccountReplicationType" {
+    default = "GRS"
+}
+
 # AWS Bucket Variables
 variable "s3BucketName" {
     default = "bucket12sh3df0ku"
@@ -42,4 +50,25 @@ variable "s3BucketName" {
 
 variable "numberOfBuckets" {
     default = 2
+}
+
+# Vm variables
+variable "vmName" {
+    default = "staging-vm-01"
+}
+
+variable "vmSize" {
+    default = "Standard_DS1_v2"
+}
+
+variable "vm_osProfile_computerName" {
+    default = "hostname"
+}
+
+variable "vm_osProfile_adminUsername" {
+    default = "testadmin"
+}
+
+variable "vm_osProfile_adminPassword" {
+    default = "Password1234!"
 }

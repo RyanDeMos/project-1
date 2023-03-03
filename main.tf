@@ -42,22 +42,22 @@ resource "azurerm_storage_account" "stg-acc" {
   name                     = "${var.storageAccountName}"
   resource_group_name      = azurerm_resource_group.RG01.name
   location                 = azurerm_resource_group.RG01.location
-  account_tier             = "Standard"
-  account_replication_type = "GRS"
+  account_tier             = "${var.storageAccountTier}"
+  account_replication_type = "${var.storageAccountReplicationType}"
 
   tags = {
-    environment = "staging"
+    environment = "test"
   }
 }
 
 
 # Creates a linux virtual machine in Azure
 resource "azurerm_virtual_machine" "main" {
-  name                  = "staging-vm-01"
+  name                  = "${var.vmName}"
   location              = azurerm_resource_group.RG01.location
   resource_group_name   = azurerm_resource_group.RG01.name
   network_interface_ids = []
-  vm_size               = "Standard_DS1_v2"
+  vm_size               = "${var.vmSize}"
 
 
   storage_image_reference {
@@ -73,16 +73,15 @@ resource "azurerm_virtual_machine" "main" {
     managed_disk_type = "Standard_LRS"
   }
   os_profile {
-    computer_name  = "hostname"
-    admin_username = "testadmin"
-    admin_password = "Password1234!"
+    computer_name  = "${var.vm_osProfile_computerName}"
+    admin_username = "${var.vm_osProfile_adminUsername}"
+    admin_password = "${var.vm_osProfile_adminPassword}"
   }
   os_profile_linux_config {
     disable_password_authentication = false
   }
   tags = {
-    environment = "staging",
-    source = "terraform"
+    environment = "test"
   }
 }
 
